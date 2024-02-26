@@ -1,9 +1,9 @@
 
 from typing import List
 
-import os
 import random
 import pathlib
+import numpy as np
 
 from feature_extraction import extract_spectrogram
 from utils import (
@@ -11,7 +11,7 @@ from utils import (
     get_audio_file_data,
     get_files_from_dir_with_pathlib,
     move_files,
-    serialize_features_and_metadata,
+    write_pickle,
     split_into_sequences
 )
 
@@ -36,7 +36,7 @@ def main(dataset_dirs: List[pathlib.Path], output_dir: pathlib.Path, ratio: List
             audio_data, _ = get_audio_file_data(audio_path)
             stft = extract_spectrogram(audio_data)
 
-            one_hot_label = [0] * len(labels)
+            one_hot_label = np.zeros(len(labels), dtype=np.float32)
             one_hot_label[labels.index(audio_path.parent.stem)] = 1
 
             for seq_idx, seq in enumerate(split_into_sequences(stft, seq_len)):
@@ -47,7 +47,7 @@ def main(dataset_dirs: List[pathlib.Path], output_dir: pathlib.Path, ratio: List
                     'features': seq,
                     'label': one_hot_label
                 }
-                serialize_features_and_metadata(
+                write_pickle(
                     str(output_combined_dir / file_name),
                     features_and_metadata)
 

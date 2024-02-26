@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy
+from pathlib import Path
 from typing import Tuple, Union, Dict
 from pickle import load as pickle_load
-from pathlib import Path
-
-from torch.utils.data import Dataset
-import numpy
+from torch.utils.data import Dataset, DataLoader
 
 from utils import get_files_from_dir_with_pathlib
 
@@ -59,6 +58,11 @@ class MyDataset(Dataset):
         with file_path.open('rb') as f:
             return pickle_load(f)
 
+    def get_loader(self, batch_size: int, shuffle: bool = True) \
+            -> DataLoader:
+        """Returns a DataLoader for the dataset."""
+        return DataLoader(self, batch_size=batch_size, shuffle=shuffle)
+
     def __len__(self) \
             -> int:
         """Returns the length of the dataset.
@@ -86,6 +90,6 @@ if __name__ == '__main__':
     dataset_dir = Path('dataset/features')
     dataset = MyDataset(dataset_dir, split='test')
     features, label = dataset[0]
-    print(features.shape)
-    print(label)
+    print("Features shape:", features.shape)
+    print("Label shape:", label.shape)
     print(len(dataset))

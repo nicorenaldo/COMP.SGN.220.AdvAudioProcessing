@@ -56,8 +56,8 @@ def get_audio_file_data(audio_file: Union[str, pathlib.Path], sr: int = None) \
     return librosa.core.load(path=audio_file, sr=sr, mono=True)
 
 
-def serialize_features_and_metadata(
-        file: str, features_and_classes: MutableMapping[str, Union[np.ndarray, int]]) -> None:
+def write_pickle(
+        file: str, data: MutableMapping[str, Union[np.ndarray, int]]) -> None:
     """Serializes the features and classes.
 
     :param file: File to dump the serialized features
@@ -66,7 +66,7 @@ def serialize_features_and_metadata(
     :type features_and_classes: dict[str, numpy.ndarray|int]
     """
     with open(file, 'wb') as pkl_file:
-        pickle.dump(features_and_classes, pkl_file)
+        pickle.dump(data, pkl_file)
 
 
 def split_into_sequences(spec: np.ndarray, seq_len: int) \

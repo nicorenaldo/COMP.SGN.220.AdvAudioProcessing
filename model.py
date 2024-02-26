@@ -58,7 +58,9 @@ class MyModel(Module):
 
 if __name__ == '__main__':
     with open("dataset/features/labels.txt", "rb") as f:
-        labels = f.read().decode("utf-8").split("\n")
+        labels = []
+        for line in f:
+            labels.append(line.decode("utf-8").strip())
 
     model = MyModel(output_classes=len(labels))
     train_ds = MyDataset(
