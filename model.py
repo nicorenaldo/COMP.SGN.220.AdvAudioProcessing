@@ -51,7 +51,8 @@ class MyModel(Module):
         x = self.conv_block_2(x)
         x = x.reshape(x.shape[0], -1, x.shape[-1])  # Reshape for LSTM
         x, _ = self.lstm(x)
-        x = self.fc(self.dropout(x[:, -1, :]))  # Use the output of the last LSTM time step
+        x = self.dropout(x[:, -1, :])  # Use the output of the last LSTM time step
+        x = self.fc(x)
         return x
 
 
