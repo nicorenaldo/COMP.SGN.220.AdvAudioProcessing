@@ -2,7 +2,7 @@ from pathlib import Path
 import torch
 
 from torch.nn import Module, Conv2d, MaxPool2d, \
-    BatchNorm2d, ReLU, Linear, Sequential, Dropout, LSTM
+    BatchNorm2d, ReLU, Linear, Sequential, Dropout, GRU
 from torchsummary import summary
 
 from dataset import MyDataset
@@ -37,8 +37,13 @@ class MyModel(Module):
                       stride=2),
         )
 
-        # LSTM layers for capturing time series data
-        self.lstm = LSTM(input_size=64, hidden_size=128, num_layers=2, batch_first=True)
+        # GRU layers for capturing time series data
+        self.gru = GRU(
+            input_size=64,
+            hidden_size=128,
+            num_layers=3,
+            batch_first=True,
+        )
         self.dropout = Dropout(0.5)
 
         # Fully connected layer
@@ -49,9 +54,9 @@ class MyModel(Module):
 
         x = self.conv_block_1(x)
         x = self.conv_block_2(x)
-        x = x.reshape(x.shape[0], -1, x.shape[-1])  # Reshape for LSTM
-        x, _ = self.lstm(x)
-        x = self.dropout(x[:, -1, :])  # Use the output of the last LSTM time step
+        x = x.reshape(x.shape[0], -1, x.shape[1])  # Reshape for GRU
+        x, _ = self.gru(x)
+        x = self.dropout(x[:, -1, :])  # Use the output of the last GRU time step
         x = self.fc(x)
         return x
 
@@ -75,18 +80,18 @@ if __name__ == '__main__':
         y.append(y_)
     x = torch.Tensor(x)
     y = torch.Tensor(y)
-    print(x.shape)
+    print("Input shape:", x.shape)
 
     d_time = 60
     d_feature = 1025
     batch_size = 3
-    summary(
-        model,
-        input_size=(1, d_time, d_feature),
-        batch_size=batch_size,
-        device="cpu",
-        branching=True
-    )
+    # summary(
+    #     model,
+    #     input_size=(1, d_time, d_feature),
+    #     batch_size=batch_size,
+    #     device="cpu",
+    #     branching=True
+    # )
 
     result = model(x)
     print("Result shape:", result.shape)

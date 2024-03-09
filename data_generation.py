@@ -32,24 +32,28 @@ def main(dataset_dirs: List[pathlib.Path], output_dir: pathlib.Path, ratio: List
         audio_paths = get_audio_files_from_subdirs(dataset_dir)
         print(f'Found {len(audio_paths)} audio files from {dataset_dir}')
         for audio_path in audio_paths:
-            song_count += 1
-            audio_data, _ = get_audio_file_data(audio_path)
-            stft = extract_spectrogram(audio_data)
+            try:
+                song_count += 1
+                audio_data, _ = get_audio_file_data(audio_path)
+                stft = extract_spectrogram(audio_data)
 
-            one_hot_label = np.zeros(len(labels), dtype=np.float32)
-            one_hot_label[labels.index(audio_path.parent.stem)] = 1
+                one_hot_label = np.zeros(len(labels), dtype=np.float32)
+                one_hot_label[labels.index(audio_path.parent.stem)] = 1
 
-            for seq_idx, seq in enumerate(split_into_sequences(stft, seq_len)):
-                seq_count += 1
-                file_name = f'{audio_path.stem}_{audio_path.parent.stem}_seq_{seq_idx:03}.pkl'
+                for seq_idx, seq in enumerate(split_into_sequences(stft, seq_len)):
+                    seq_count += 1
+                    file_name = f'{audio_path.stem}_{audio_path.parent.stem}_seq_{seq_idx:03}.pkl'
 
-                features_and_metadata = {
-                    'features': seq,
-                    'label': one_hot_label
-                }
-                write_pickle(
-                    str(output_combined_dir / file_name),
-                    features_and_metadata)
+                    features_and_metadata = {
+                        'features': seq,
+                        'label': one_hot_label
+                    }
+                    write_pickle(
+                        str(output_combined_dir / file_name),
+                        features_and_metadata)
+            except Exception as e:
+                print(f"Error processing {audio_path}: {e}")
+                continue
 
     print(f"Finished processing {song_count} songs and {seq_count} sequences.")
 
