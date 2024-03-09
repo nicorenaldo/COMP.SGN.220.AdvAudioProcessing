@@ -25,6 +25,7 @@ class MyModel(Module):
             MaxPool2d(kernel_size=2,
                       stride=2),
         )
+
         self.conv_block_2 = Sequential(
             Conv2d(in_channels=32,
                    out_channels=64,
@@ -37,18 +38,31 @@ class MyModel(Module):
                       stride=2),
         )
 
+        self.conv_block_3 = Sequential(
+            Conv2d(in_channels=64,
+                   out_channels=128,
+                   kernel_size=3,
+                   stride=1,
+                   padding=1),
+            BatchNorm2d(num_features=128),
+            ReLU(),
+            MaxPool2d(kernel_size=2,
+                      stride=2),
+        )
+
         # LSTM layers for capturing time series data
-        self.lstm = LSTM(input_size=64, hidden_size=128, num_layers=2, batch_first=True)
+        self.lstm = LSTM(input_size=128, hidden_size=256, num_layers=2, batch_first=True)
         self.dropout = Dropout(0.5)
 
         # Fully connected layer
-        self.fc = Linear(128, output_classes)
+        self.fc = Linear(256, output_classes)
 
     def forward(self, x):
         x = x if x.dim() == 4 else x.unsqueeze(1)
 
         x = self.conv_block_1(x)
         x = self.conv_block_2(x)
+        # x = self.conv_block_3(x)
         x = x.reshape(x.shape[0], -1, x.shape[-1])  # Reshape for LSTM
         x, _ = self.lstm(x)
         x = self.dropout(x[:, -1, :])  # Use the output of the last LSTM time step

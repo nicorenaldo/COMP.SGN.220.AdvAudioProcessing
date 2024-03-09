@@ -4,6 +4,7 @@ from typing import List
 import random
 import pathlib
 import numpy as np
+import librosa
 
 from feature_extraction import extract_spectrogram
 from utils import (
@@ -12,8 +13,41 @@ from utils import (
     get_files_from_dir_with_pathlib,
     move_files,
     write_pickle,
+    load_pickle,
     split_into_sequences
 )
+
+def add_noise(y: np.ndarray, snr_db: float = 20.0, mode: str = 'normalize') -> np.ndarray:
+    # Add noise to the signal
+    noise = np.random.normal(0, 1, len(y))
+    signal_power = np.sum(y ** 2) / len(y)
+
+    target_noise = signal_power / (10 ** (snr_db / 10))
+    current_noise = np.sum(noise ** 2) / len(noise)
+
+    noise *= np.sqrt(target_noise / current_noise)
+    y_noised = y + noise
+
+    return y_noised.astype(np.float32)
+
+def add_pitch_shift(y: np.ndarray, n_steps: float, sr: int = 44100) -> np.ndarray:
+    y_shift = librosa.effects.pitch_shift(y=y, sr=sr, n_steps=n_steps) # Perform pitch shift to the input signal
+    
+    return y_shift
+
+def augment_data_from_pickle(input_dir, output_dir, generate_noise = True, generate_pshifted = True):
+    songs = [f.stem for f in get_files_from_dir_with_pathlib(input_dir)]
+    for file in songs:
+        data = load_pickle(file)
+        features = data.get("features")
+        target = data.get("features")
+        
+        if generate_noise:
+            y_noised = add_noise(features)
+            data = {
+                'features' : y_noised,
+                'class' : target
+            }
 
 
 def main(dataset_dirs: List[pathlib.Path], output_dir: pathlib.Path, ratio: List[float]):
@@ -77,6 +111,10 @@ def main(dataset_dirs: List[pathlib.Path], output_dir: pathlib.Path, ratio: List
     print(f"Test: {len(test_files)} files")
 
     output_combined_dir.rmdir()
+
+    # train_dir = output_dir / 'train'
+    # augment_data_from_pickle(train_dir, train_dir)
+
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pickle
-from typing import List, MutableMapping, Union, Tuple
+from typing import List, MutableMapping, Union, Tuple, Dict
 from pathlib import Path
 import pathlib
 import os
@@ -67,6 +67,17 @@ def write_pickle(
     """
     with open(file, 'wb') as pkl_file:
         pickle.dump(data, pkl_file)
+
+def load_pickle(file: str):
+    """Load features and classes from pickled file.
+
+    :param file: File to load the serialized features
+    :type file: str
+    :param features_and_classes: Features and classes.
+    :type features_and_classes: dict[str, numpy.ndarray|int]
+    """
+    with file.open('rb') as f:
+        return pickle.pickle_load(f)
 
 
 def split_into_sequences(spec: np.ndarray, seq_len: int) \
