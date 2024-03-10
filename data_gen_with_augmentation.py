@@ -43,7 +43,7 @@ def main(dataset_dirs: List[pathlib.Path], output_dir: pathlib.Path, ratio: List
                     file_name = f'{audio_path.stem}_{audio_path.parent.stem}_seq_{seq_idx:03}.wav'
                     sf.write(output_combined_dir / file_name, seq, sr)
             except Exception as e:
-                print(f"Error processing {audio_file}: {e}")
+                print(f"Error processing {audio_path}: {e}")
                 continue
                     
 
