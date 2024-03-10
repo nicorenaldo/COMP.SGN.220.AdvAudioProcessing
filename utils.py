@@ -69,6 +69,18 @@ def write_pickle(
         pickle.dump(data, pkl_file)
 
 
+def load_pickle(file: str):
+    """Load features and classes from pickled file.
+
+    :param file: File to load the serialized features
+    :type file: str
+    :param features_and_classes: Features and classes.
+    :type features_and_classes: dict[str, numpy.ndarray|int]
+    """
+    with file.open('rb') as f:
+        return pickle.pickle_load(f)
+
+
 def split_into_sequences(spec: np.ndarray, seq_len: int) \
         -> List[np.ndarray]:
     """Splits the spectrum `spec` into sequences of length `seq_len`.
@@ -84,6 +96,22 @@ def split_into_sequences(spec: np.ndarray, seq_len: int) \
     n_frames = spec.shape[1]
     n_sequences = n_frames // seq_len
     return np.array([spec[:, i * seq_len:(i + 1) * seq_len] for i in range(n_sequences)])
+
+
+def split_audio_into_sequences(y: np.ndarray, n_seq: int) \
+        -> List[np.ndarray]:
+    """Splits the audio `y` into sequences of length `seq_len`.
+
+    :param y: Audio to be split into sequences.
+    :type y: numpy.ndarray
+    :param n_seq: Number of output sequences.
+    :type n_seq: int
+    :return: List of sequences.
+    :rtype: list[numpy.ndarray]
+    """
+    # Discard if extra frames
+    seq_frames = y.shape[0] // n_seq
+    return np.array([y[i * seq_frames:(i + 1) * seq_frames] for i in range(n_seq)])
 
 
 def move_files(files: List[pathlib.Path], dest_dir: pathlib.Path) -> None:
