@@ -38,7 +38,7 @@ def main(dataset_dirs: List[pathlib.Path], output_dir: pathlib.Path, ratio: List
                 song_count += 1
                 audio_data, sr = get_audio_file_data(audio_path)
 
-                for seq_idx, seq in enumerate(split_audio_into_sequences(audio_data, n_seq)):
+                for seq_idx, seq in enumerate(split_audio_into_sequences(audio_data, n_seq, sr)):
                     seq_count += 1
                     file_name = f'{audio_path.stem}_{audio_path.parent.stem}_seq_{seq_idx:03}.wav'
                     sf.write(output_combined_dir / file_name, seq, sr)

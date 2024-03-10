@@ -98,7 +98,7 @@ def split_into_sequences(spec: np.ndarray, seq_len: int) \
     return np.array([spec[:, i * seq_len:(i + 1) * seq_len] for i in range(n_sequences)])
 
 
-def split_audio_into_sequences(y: np.ndarray, n_seq: int) \
+def split_audio_into_sequences(y: np.ndarray, n_seq: int, sr: int) \
         -> List[np.ndarray]:
     """Splits the audio `y` into sequences of length `seq_len`.
 
@@ -110,8 +110,14 @@ def split_audio_into_sequences(y: np.ndarray, n_seq: int) \
     :rtype: list[numpy.ndarray]
     """
     # Discard if extra frames
-    seq_frames = y.shape[0] // n_seq
-    return np.array([y[i * seq_frames:(i + 1) * seq_frames] for i in range(n_seq)])
+    splits = []
+    seq_len = 3 * sr
+    for i in range(0, y.shape[0], seq_len):
+        individual_split = y[i:i+seq_len]
+        if individual_split.shape[0] == seq_len:
+            splits.append(individual_split)
+
+    return splits
 
 
 def move_files(files: List[pathlib.Path], dest_dir: pathlib.Path) -> None:
